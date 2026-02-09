@@ -1,0 +1,7 @@
+const BACKEND_URL="https://api.ftle.in"
+export const TRADE=BACKEND_URL+"/api/public/trades"
+export const SAVE_TRADE=BACKEND_URL+"/api/private/trades"
+export const GET_ALL_SCRIPS=BACKEND_URL+"/api/public/scrips"
+export const GET_LIVE_DATA=BACKEND_URL+"/api/public/market/live"
+export const GET_TRADE_STATS=BACKEND_URL+"/api/public/stats"
+export const EXPORT_EXCEL=BACKEND_URL+"/api/private/export"
