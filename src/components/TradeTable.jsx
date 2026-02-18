@@ -16,22 +16,24 @@ import {
 } from "lucide-react";
 import TradeDashboardHeading from './TradeDashboardHeading';
 
-const TradeTable = ({ tradeDetails, authDetails }) => {
+const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
     const { trades, loading, totalPages } = tradeDetails;
     const { role } = authDetails;
+    console.log(statusFilterDefault);
     const dispatch = useDispatch();
     const [page, setPage] = useState(0);
     const [selectedTrade, setSelectedTrade] = useState(null);
     const [showAddTrade, setShowAddTrade] = useState(false);
     const liveQuotes = useSelector(state => state.market.quotes);
     const [symbolFilter, setSymbolFilter] = useState("");
-    const [statusFilter, setStatusFilter] = useState("ALL");
+    const [statusFilter, setStatusFilter] = useState(statusFilterDefault || "ALL");
     const [plFilter, setPlFilter] = useState("ALL"); // New P/L Filter State
     const [sortBy, setSortBy] = useState("tradeDate");
     const [sortDir, setSortDir] = useState("desc");
     useEffect(() => {
+        setStatusFilter(statusFilterDefault || "ALL");
         dispatch(fetchTrades({ page, size: 10 }));
-    }, [page, dispatch]);
+    }, [page, dispatch,statusFilterDefault]);
 
     const closeModal = () => {
         setSelectedTrade(null);
@@ -48,16 +50,25 @@ const TradeTable = ({ tradeDetails, authDetails }) => {
         }
     };
 
-    const calculatePL = (trade) => {
+    const calculatePL = (trade,currentPrice) => {
         if (trade.status === "Closed" && trade.exitPrice) {
             return (trade.exitPrice - trade.entryPrice) * trade.quantity;
         }
 
-        const currentPrice = getCurrentPrice(trade);
         if (!currentPrice) return 0;
 
         return (currentPrice - trade.entryPrice) * trade.quantity;
     };
+
+    const calculatePercentageChange = (trade, currentPrice) => {
+        if (trade.status === "Closed" && trade.exitPrice) {
+          return (trade.exitPrice - trade.entryPrice) / trade.entryPrice;
+        }
+      
+        if (!currentPrice) return 0;
+      
+        return (currentPrice - trade.entryPrice) / trade.entryPrice;
+      };
 
     const priceMap = useMemo(() => {
         const map = {};
@@ -81,7 +92,8 @@ const TradeTable = ({ tradeDetails, authDetails }) => {
             .filter((t) => (statusFilter === "ALL" ? true : t.status === statusFilter))
             .filter((t) => {
                 if (plFilter === "ALL") return true;
-                const pl = calculatePL(t);
+                const currentPrice = getCurrentPrice(t);
+                const pl = calculatePL(t,currentPrice);
                 if (plFilter === "PROFIT") return t.status === "Closed" && pl > 0;
                 if (plFilter === "LOSS") return t.status === "Closed" && pl < 0;
                 if (plFilter === "UNREALIZED") return t.status === "Open";
@@ -186,6 +198,7 @@ const TradeTable = ({ tradeDetails, authDetails }) => {
                                 <Th label="Exit" field="exitPrice" sortBy={sortBy} sortDir={sortDir} onClick={handleSort} />
                                 <Th label="Current" field="currentPrice" onClick={() => { }} />
                                 <Th label="P/L" field="pl" sortBy={sortBy} sortDir={sortDir} onClick={() => { }} />
+                                <Th label="% Change" field="pchange" sortBy={sortBy} sortDir={sortDir} onClick={handleSort} />
                                 <Th label="Status" field="status" sortBy={sortBy} sortDir={sortDir} onClick={handleSort} />
                                 <Th label="Date" field="tradeDate" sortBy={sortBy} sortDir={sortDir} onClick={handleSort} />
                             </tr>
@@ -193,7 +206,8 @@ const TradeTable = ({ tradeDetails, authDetails }) => {
                         <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                             {filteredTrades.map((trade) => {
                                 const currentPrice = getCurrentPrice(trade);
-                                const pl = calculatePL(trade);
+                                const pl = calculatePL(trade,currentPrice);
+                                const pchange = calculatePercentageChange(trade,currentPrice);
                                 const isProfit = pl >= 0;
                                 const isCurrentlyAboveEntry = currentPrice >= trade.entryPrice;
 
@@ -251,6 +265,14 @@ const TradeTable = ({ tradeDetails, authDetails }) => {
                                                         Realized
                                                     </span>
                                                 )}
+                                            </div>
+                                        </td>
+
+                                        <td className="px-6 py-4 font-mono">
+                                            <div className="flex flex-col gap-1">
+                                                <span className={`font-bold text-lg ${isProfit ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}`}>
+                                                    {isProfit ? '+' : ''}{pchange.toLocaleString('en-IN')}%
+                                                </span>
                                             </div>
                                         </td>
 

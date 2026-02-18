@@ -1,4 +1,5 @@
-const BACKEND_URL="https://api.ftle.in"
+// const BACKEND_URL="https://api.ftle.in"
+const BACKEND_URL="http://localhost:8080"
 export const TRADE=BACKEND_URL+"/api/public/trades"
 export const SAVE_TRADE=BACKEND_URL+"/api/private/trades"
 export const GET_ALL_SCRIPS=BACKEND_URL+"/api/public/scrips"

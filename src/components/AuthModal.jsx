@@ -84,7 +84,7 @@ export default function AuthModal({ open, onClose }) {
 
           <button
             type="submit"
-            className="w-full px-4 py-2 rounded bg-[rgb(var(--color-primary))] text-white"
+            className="w-full px-4 py-2 rounded bg-[rgb(var(--color-primary))] text-black"
           >
             Sign in as Admin
           </button>
