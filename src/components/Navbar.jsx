@@ -69,7 +69,7 @@ export default function Navbar({ onAuthOpen, isDark, toggleTheme }) {
                         {isDark ? <FiSun size={20} /> : <FiMoon size={20} />}
                     </button>
 
-                    <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800 mx-1" />
+                    <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
 
                     {isAuthenticated ? (
                         <div className="flex items-center gap-4">

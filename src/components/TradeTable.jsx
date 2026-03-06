@@ -19,7 +19,6 @@ import TradeDashboardHeading from './TradeDashboardHeading';
 const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
     const { trades, loading, totalPages } = tradeDetails;
     const { role } = authDetails;
-    console.log(statusFilterDefault);
     const dispatch = useDispatch();
     const [page, setPage] = useState(0);
     const [selectedTrade, setSelectedTrade] = useState(null);
@@ -62,12 +61,12 @@ const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
 
     const calculatePercentageChange = (trade, currentPrice) => {
         if (trade.status === "Closed" && trade.exitPrice) {
-          return (trade.exitPrice - trade.entryPrice) / trade.entryPrice;
+          return ((trade.exitPrice - trade.entryPrice) / trade.entryPrice)*100;
         }
       
         if (!currentPrice) return 0;
       
-        return (currentPrice - trade.entryPrice) / trade.entryPrice;
+        return ((currentPrice - trade.entryPrice) / trade.entryPrice)*100;
       };
 
     const priceMap = useMemo(() => {

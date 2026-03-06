@@ -32,37 +32,37 @@ function Dashboard() {
   }, [dispatch]);
 
   const displayStats = useMemo(() => {
+    // 1. Map live prices (normalize keys to Uppercase for matching)
     const priceMap = {};
     (liveQuotes || []).forEach(q => {
-      priceMap[q.display_symbol] = Number(q.ltp);
-      priceMap[`${q.exchange}|${q.exchange_token}`] = Number(q.ltp);
+      if (q.display_symbol) priceMap[q.display_symbol.toUpperCase()] = Number(q.ltp);
+      if (q.exchange_token) priceMap[q.exchange_token.toString()] = Number(q.ltp);
     });
 
-    /**
-     * UNREALIZED P/L (Hybrid Calculation)
-     * We use the global 'totalOpen' and 'openPositionsEntryValue' from the backend,
-     * but we apply the live prices from Redux.
-     */
-    const currentMarketValue = trades.reduce((acc, t) => {
+    // 2. Standard Unrealized P/L Calculation
+    const liveUnrealizedPnL = trades.reduce((acc, t) => {
       if (t.status === "Open") {
-        const ltp = priceMap[t.symbol] || t.entryPrice; // Fallback to entry if no quote
-        return acc + (ltp * t.quantity);
+        const symbolKey = t.symbol?.toUpperCase();
+        const ltp = priceMap[symbolKey];
+
+        // Only calculate if we actually have a live price, otherwise P/L is 0
+        if (ltp) {
+          const tradePnL = (ltp - t.entryPrice) * t.quantity;
+          return acc + tradePnL;
+        }
       }
       return acc;
     }, 0);
 
-    // Live Unrealized = (Current Market Value of Open Trades) - (What you paid for them)
-    // Note: This works best if 'trades' includes all open positions.
-    const liveUnrealizedPnL = currentMarketValue - (stats?.openPositionsEntryValue || 0);
-
+    // 3. Combine with backend stats
     return {
       realizedPnL: stats?.realizedPnL || 0,
       winRate: stats?.winRate || 0,
       totalClosed: stats?.totalClosed || 0,
       totalOpen: stats?.totalOpen || 0,
-      unrealizedPnL: liveUnrealizedPnL
+      unrealizedPnL: liveUnrealizedPnL // Now correctly calculated per trade
     };
-  }, [trades, liveQuotes, stats]);
+}, [trades, liveQuotes, stats]);
 
   return (
     <div className="p-6 space-y-8 min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
