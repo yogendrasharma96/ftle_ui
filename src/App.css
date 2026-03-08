@@ -187,3 +187,35 @@
     @apply bg-background text-foreground;
   }
 }
+
+
+/* This ensures that when you select H1, it actually looks big */
+.tiptap h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.tiptap h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.tiptap h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.tiptap p {
+  margin: 0.5rem 0;
+}
+
+.tiptap ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+}
+
+.tiptap ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+}

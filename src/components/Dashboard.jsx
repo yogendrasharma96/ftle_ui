@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchTradeStats } from "../slice/getTradeSlice"; // Ensure you have this action
+import { fetchTradeStats, fetchTrades } from "../slice/getTradeSlice"; // Ensure you have this action
 import TradeTable from "./TradeTable";
 import {
   Target,
@@ -10,6 +10,7 @@ import {
   BarChart2
 } from "lucide-react";
 import StatCard from "./StatCard";
+import { setFY } from "@/slice/utilitiesSlice";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -25,7 +26,6 @@ function Dashboard() {
   if (theme == 'light') {
     arrowColor = "%23ffffff"
   }
-
   // 1. Fetch Global Stats on mount
   useEffect(() => {
     dispatch(fetchTradeStats());
@@ -38,31 +38,28 @@ function Dashboard() {
       if (q.display_symbol) priceMap[q.display_symbol.toUpperCase()] = Number(q.ltp);
       if (q.exchange_token) priceMap[q.exchange_token.toString()] = Number(q.ltp);
     });
-
     // 2. Standard Unrealized P/L Calculation
-    const liveUnrealizedPnL = trades.reduce((acc, t) => {
-      if (t.status === "Open") {
-        const symbolKey = t.symbol?.toUpperCase();
+    const liveUnrealizedPnL = stats.openPositionDtos.reduce((acc, pos) => {
+        const symbolKey = pos.symbol?.toUpperCase();
         const ltp = priceMap[symbolKey];
 
         // Only calculate if we actually have a live price, otherwise P/L is 0
         if (ltp) {
-          const tradePnL = (ltp - t.entryPrice) * t.quantity;
+          const tradePnL = (ltp - pos.avgEntryPrice) * pos.quantity;
           return acc + tradePnL;
         }
-      }
       return acc;
     }, 0);
 
     // 3. Combine with backend stats
     return {
       realizedPnL: stats?.realizedPnL || 0,
-      winRate: stats?.winRate || 0,
+      roi: stats?.roi || 0,
       totalClosed: stats?.totalClosed || 0,
       totalOpen: stats?.totalOpen || 0,
       unrealizedPnL: liveUnrealizedPnL // Now correctly calculated per trade
     };
-}, [trades, liveQuotes, stats]);
+  }, [trades, liveQuotes, stats]);
 
   return (
     <div className="p-6 space-y-8 min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
@@ -77,8 +74,13 @@ function Dashboard() {
           </label>
           <select
             value={selectedYear}
-            onChange={(e) => setSelectedYear(e.target.value)}
-            className="appearance-none px-3 pr-10 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm 
+            onChange={(e) => {
+              setSelectedYear(e.target.value);
+              dispatch(setFY(e.target.value));
+              dispatch(fetchTrades({ page: 0, size: 10 }));
+              dispatch(fetchTradeStats());
+            }}
+            className="appearance-none px-2 pr-10 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm 
              focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none 
              transition-all dark:text-white cursor-pointer text-sm text-slate-900
              bg-no-repeat bg-position-[right_0.75rem_center] bg-size-[1.25em_1.25em]"
@@ -87,8 +89,8 @@ function Dashboard() {
             }}
           >
             <option value="ALL">ALL</option>
-            <option value="2024">2024-2025</option>
-            <option value="2025">2025-2026</option>
+            <option value="2024-25">2024-25</option>
+            <option value="2025-26">2025-26</option>
           </select>
         </div>
       </div>
@@ -114,8 +116,8 @@ function Dashboard() {
 
         {/* 3. Win Rate - FROM BACKEND */}
         <StatCard
-          label="Win Rate"
-          value={`${displayStats.winRate}%`}
+          label="Return On Investment %"
+          value={`${displayStats.roi}%`}
           icon={<Target className="w-5 h-5" />}
           colorClass="text-indigo-500"
           bgClass="bg-indigo-500/10"

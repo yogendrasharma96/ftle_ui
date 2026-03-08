@@ -4,9 +4,11 @@ import { getPublicData } from "../api/authFetch";
 
 export const fetchTrades = createAsyncThunk(
   "trade/fetchTrades",
-  async ({ page = 0, size = 10 }) => {
+  async ({ page = 0, size = 10 }, { getState }) => {
+    const fy = getState().utilities.financialYear;
+    console.log("Fetching trades for financial year:", fy);
     const res = await fetch(
-      TRADE+`?page=${page}&size=${size}`
+      TRADE+`?page=${page}&size=${size}&financialYear=${fy}`
     );
     return res.json();
   }
@@ -14,8 +16,10 @@ export const fetchTrades = createAsyncThunk(
 
 export const fetchTradeStats = createAsyncThunk(
   "trade/fetchTradeStats",
-  async () => {
-    const res = await getPublicData(GET_TRADE_STATS);
+  async (_,{ getState }) => {
+    const fy = getState().utilities.financialYear;
+    console.log(GET_TRADE_STATS+`?financialYear=${fy}`);
+    const res = await getPublicData(GET_TRADE_STATS+`?financialYear=${fy}`);
     if (!res.ok) throw new Error("Failed to fetch stats");
     return res.json();
   }
@@ -27,10 +31,11 @@ const getTradeSlice = createSlice({
     trades: [],
     stats: {
       realizedPnL: 0,
-      winRate: 0,
+      roi: 0,
       totalClosed: 0,
       totalOpen: 0,
-      openPositionsEntryValue: 0
+      openPositionsEntryValue: 0,
+      openPositionDtos: [],
     },
     totalPages: 0,
     totalElements: 0,

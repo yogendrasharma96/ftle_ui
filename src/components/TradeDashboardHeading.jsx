@@ -1,17 +1,20 @@
 import { DownloadIcon, PlusCircleIcon, Loader2 } from 'lucide-react'
-import React, { useState } from 'react'
+import React, { use, useState } from 'react'
 import { authDownload } from '../api/authFetch'
 import { EXPORT_EXCEL } from '../constants'
+import { useSelector } from 'react-redux'
 
 const TradeDashboardHeading = ({ role, totalTrades, setTrade }) => {
 
     const [exporting, setExporting] = useState(false)
 
+    const fy=useSelector(state => state.utilities.financialYear)
+
     const handleExport = async () => {
       try {
         setExporting(true)
     
-        const blob = await authDownload(EXPORT_EXCEL)
+        const blob = await authDownload(EXPORT_EXCEL+`?financialYear=${fy}`)
     
         const url = window.URL.createObjectURL(blob)
     
