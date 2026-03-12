@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import StatCard from "./StatCard";
 import { setFY } from "@/slice/utilitiesSlice";
+import AuthorViewsSlider from "./AuthorViewsSlider";
 
 function Dashboard() {
   const dispatch = useDispatch();
@@ -146,6 +147,7 @@ function Dashboard() {
 
       <div className="mt-8">
         <TradeTable tradeDetails={trade} authDetails={auth} statusFilterDefault={statusFilterDefault} />
+        <AuthorViewsSlider />
       </div>
     </div>
   );

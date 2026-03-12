@@ -35,8 +35,7 @@ function AddTrade({ trade, onClose }) {
   const entryDateRef = useRef(null);
   const exitDateRef = useRef(null);
   const location = useLocation();
-  const isAddFormPage = location.pathname.includes("/addtrade");
-
+  const isAddFormPage = location.pathname==="/trades/new";
   const [submitting, setSubmitting] = useState(false);
   const [apiError, setApiError] = useState("");
   const [symbols, setSymbols] = useState([]);
@@ -67,10 +66,10 @@ function AddTrade({ trade, onClose }) {
   }, []);
 
   const handleClose = () => {
-    onClose ? onClose() : navigate("/home");
+    onClose ? onClose() : navigate("/dashboard");
   };
 
-  const { register, handleSubmit, setValue, watch,control, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm({
     defaultValues: trade || {
       symbol: "",
       exchange: "NSE",
@@ -115,9 +114,15 @@ function AddTrade({ trade, onClose }) {
   };
 
   return (
-    <div className={`${!onClose ? "min-h-screen bg-slate-50 dark:bg-slate-950 p-6" : "w-full"} transition-colors duration-300`}>
-      <div className={`${!onClose ? "max-w-5xl mx-auto bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" : "w-full bg-transparent"}`}>
-
+    <div className={`${isAddFormPage 
+      ? "min-h-screen bg-slate-50 dark:bg-slate-950"
+      : "w-full"
+    } transition-colors duration-300`}>
+    
+      <div className={`${isAddFormPage
+        ? "w-full bg-white dark:bg-slate-900"
+        : "w-full bg-transparent"
+      } overflow-hidden`}>
         {/* Header */}
         <div className="px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -129,12 +134,12 @@ function AddTrade({ trade, onClose }) {
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Transaction Registry • {watch("financialYear")}</p>
             </div>
           </div>
-          <button type="button" onClick={handleClose} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
+          {!isAddFormPage && <button type="button" onClick={handleClose} className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-all">
             <FiX size={24} />
-          </button>
+          </button>}
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className={`${isAddFormPage ? "px-8 py-10" : "pt-8 pb-4"}`}>
+        <form onSubmit={handleSubmit(onSubmit)} className={`${isAddFormPage ? "px-6 py-10 md:px-12" : "pt-8 pb-4"}`}>
           {apiError && (
             <div className="mb-6 p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 rounded-xl flex items-center gap-3 text-rose-600 dark:text-rose-400">
               <FiInfo className="shrink-0" />
@@ -280,10 +285,6 @@ function AddTrade({ trade, onClose }) {
             </div>
           </div>
 
-          {/* <div className="mt-6 space-y-1.5">
-            <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Journaling / Strategy Notes</label>
-            <textarea rows={3} className="w-full px-5 py-3 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 outline-none transition-all dark:text-white resize-none font-medium" placeholder="Describe the trade setup..." {...register("notes")} />
-          </div> */}
           <div className="mt-6 space-y-1.5">
             <label className="text-[11px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">
               Journaling / Strategy Notes
@@ -298,8 +299,19 @@ function AddTrade({ trade, onClose }) {
           </div>
 
           <div className="mt-10 flex items-center justify-end gap-4 border-t border-slate-100 dark:border-slate-800 pt-8 pb-4">
-            <button type="button" onClick={handleClose} className="px-6 py-3 text-sm font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors" disabled={submitting}>Discard</button>
-            <button type="submit" className="flex items-center gap-3 px-10 py-3 text-sm font-black uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-xl shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50" disabled={submitting}>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="px-6 py-3 text-sm font-black uppercase tracking-widest text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
+              disabled={submitting}
+            >
+              {isAddFormPage ? "Back to Dashboard" : "Discard"}
+            </button>
+            <button
+              type="submit"
+              className="flex items-center gap-3 px-10 py-3 text-sm font-black uppercase tracking-widest text-white bg-blue-600 hover:bg-blue-700 rounded-2xl shadow-xl shadow-blue-600/30 transition-all active:scale-95 disabled:opacity-50"
+              disabled={submitting}
+            >
               <FiSave size={18} />
               {submitting ? "Processing..." : "Commit Trade"}
             </button>

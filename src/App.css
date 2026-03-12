@@ -190,20 +190,39 @@
 
 
 /* This ensures that when you select H1, it actually looks big */
+/* Styling for Tiptap Editor Content */
+.tiptap {
+  @apply outline-none;
+}
+
+/* Ensure headings actually look like headings */
 .tiptap h1 {
-  font-size: 1.5rem;
-  font-weight: 800;
+  font-size: 1.875rem !important; /* 30px */
+  font-weight: 800 !important;
   line-height: 1.2;
+  margin-top: 1rem;
 }
 
 .tiptap h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.5rem !important; /* 24px */
+  font-weight: 700 !important;
+  line-height: 1.3;
+  margin-top: 0.8rem;
 }
 
 .tiptap h3 {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1.25rem !important; /* 20px */
+  font-weight: 700 !important;
+  margin-top: 0.5rem;
+}
+
+/* Fix for the 'First Character' visual jumping */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #adb5bd;
+  pointer-events: none;
+  height: 0;
 }
 
 .tiptap p {

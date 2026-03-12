@@ -1,5 +1,5 @@
 import { DownloadIcon, PlusCircleIcon, Loader2 } from 'lucide-react'
-import React, { use, useState } from 'react'
+import React, { useState } from 'react'
 import { authDownload } from '../api/authFetch'
 import { EXPORT_EXCEL } from '../constants'
 import { useSelector } from 'react-redux'

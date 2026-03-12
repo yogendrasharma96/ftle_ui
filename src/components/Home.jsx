@@ -26,7 +26,6 @@ const Home = () => {
       />
 
       <main>
-        <Dashboard />
         <Outlet />
       </main>
 

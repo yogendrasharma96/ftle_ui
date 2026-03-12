@@ -34,7 +34,7 @@ export default function LandingPage() {
         </p>
 
         <div className="mt-12 flex justify-center gap-6">
-          <Button onClick={()=> navigate("/home")} className="text-lg px-10 py-7 rounded-2xl shadow-xl hover:scale-105 transition">
+          <Button onClick={()=> navigate("/dashboard")} className="text-lg px-10 py-7 rounded-2xl shadow-xl hover:scale-105 transition">
             Get Started
           </Button>
           <Button
@@ -98,7 +98,7 @@ export default function LandingPage() {
           <p className="mt-5 text-indigo-100 text-lg">
             Stop guessing. Start growing with intelligent fund tracking.
           </p>
-          <Button onClick={()=> navigate("/home")} className="mt-10 text-lg px-12 py-7 rounded-2xl bg-white text-indigo-700 hover:bg-slate-100 hover:scale-105 transition">
+          <Button onClick={()=> navigate("/dashboard")} className="mt-10 text-lg px-12 py-7 rounded-2xl bg-white text-indigo-700 hover:bg-slate-100 hover:scale-105 transition">
             Launch App
           </Button>
         </motion.div>

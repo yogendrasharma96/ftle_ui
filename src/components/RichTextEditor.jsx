@@ -3,7 +3,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
-import {TextStyle} from "@tiptap/extension-text-style";
+import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 
 import {
@@ -22,6 +22,7 @@ import {
     AlignCenter,
     AlignRight
 } from "lucide-react";
+import { useEffect } from "react";
 
 const RichTextEditor = ({ value, onChange }) => {
     const editor = useEditor({
@@ -46,7 +47,12 @@ const RichTextEditor = ({ value, onChange }) => {
             }
         }
     });
-
+    useEffect(() => {
+        if (!editor) return;
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value);
+        }
+    }, [value, editor]);
     if (!editor) return null;
 
     const setLink = () => {
@@ -101,11 +107,11 @@ const RichTextEditor = ({ value, onChange }) => {
                     value={getHeadingValue()}
                     onChange={(e) => {
                         const val = e.target.value;
+                        // Chain focus() first to ensure the editor is ready to receive marks
                         if (val === "paragraph") {
                             editor.chain().focus().setParagraph().run();
                         } else {
-                            // We use toggleHeading to switch to that specific level
-                            editor.chain().focus().toggleHeading({ level: Number(val) }).run();
+                            editor.chain().focus().setHeading({ level: Number(val) }).run();
                         }
                     }}
                 >
@@ -181,10 +187,12 @@ const RichTextEditor = ({ value, onChange }) => {
 
                 <input
                     type="color"
-                    className="w-8 h-8 border-none bg-transparent cursor-pointer"
-                    onChange={(e) =>
-                        editor.chain().focus().setColor(e.target.value).run()
-                    }
+                    className="w-8 h-8 p-0 border-none bg-transparent cursor-pointer rounded overflow-hidden"
+                    value={editor.getAttributes('textStyle').color || '#000000'}
+                    onInput={(e) => {
+                        // Use onInput for real-time changes and ensure focus
+                        editor.chain().focus().setColor(e.target.value).run();
+                    }}
                     title="Text Color"
                 />
 
@@ -200,8 +208,8 @@ const ToolbarButton = ({ onClick, active, children }) => (
         type="button"
         onClick={onClick}
         className={`p-2 rounded-lg transition-colors ${active
-                ? "bg-blue-600 text-white"
-                : "text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700"
+            ? "bg-blue-600 text-white"
+            : "text-slate-500 hover:bg-slate-200 dark:hover:bg-slate-700"
             }`}
     >
         {children}
