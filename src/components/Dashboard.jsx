@@ -33,12 +33,7 @@ function Dashboard() {
     dispatch(fetchTrades({ page: 0, size: 10 }));
     dispatch(fetchTradeStats());
   }, [dispatch]);
-  // const marketIndices = useMemo(() => {
-  //   const targetIndices = ["NIFTY 50", "NIFTY BANK", "NIFTY IT", "SENSEX", "NIFTY PHARMA", "NIFTY AUTO"];
-  //   return (liveQuotes || []).filter(q => 
-  //     targetIndices.includes(q.exchange_token?.toUpperCase()) && q.change !== undefined
-  //   );
-  // }, [liveQuotes]);
+
   const displayStats = useMemo(() => {
     // 1. Map live prices (normalize keys to Uppercase for matching)
     const priceMap = {};
