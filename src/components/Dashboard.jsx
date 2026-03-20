@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchTradeStats, fetchTrades } from "../slice/getTradeSlice"; // Ensure you have this action
-import TradeTable from "./TradeTable";
 import {
   Target,
   TrendingUp,
@@ -12,14 +11,16 @@ import {
 import StatCard from "./StatCard";
 import { setFY } from "@/slice/utilitiesSlice";
 import AuthorViewsSlider from "./AuthorViewsSlider";
+import EquityCurveChart from "./Charts/EquityCurveChart";
+import MonthlyHeatmap from "./Charts/MonthlyHeatmap";
+import RecentTrades from "./RecentTrades";
+import MarketIndices from "./MarketIndices";
 
 function Dashboard() {
   const dispatch = useDispatch();
   const trade = useSelector((state) => state.trade);
-  const auth = useSelector((state) => state.auth);
   const liveQuotes = useSelector((state) => state.market.quotes);
   const theme = useSelector((state) => state.utilities);
-  const [statusFilterDefault, setStatusFilterDefault] = useState("ALL")
   const [selectedYear, setSelectedYear] = useState("ALL");
   // Get trades and the NEW stats object from Redux
   const { trades, stats } = trade;
@@ -29,9 +30,15 @@ function Dashboard() {
   }
   // 1. Fetch Global Stats on mount
   useEffect(() => {
+    dispatch(fetchTrades({ page: 0, size: 10 }));
     dispatch(fetchTradeStats());
   }, [dispatch]);
-
+  // const marketIndices = useMemo(() => {
+  //   const targetIndices = ["NIFTY 50", "NIFTY BANK", "NIFTY IT", "SENSEX", "NIFTY PHARMA", "NIFTY AUTO"];
+  //   return (liveQuotes || []).filter(q => 
+  //     targetIndices.includes(q.exchange_token?.toUpperCase()) && q.change !== undefined
+  //   );
+  // }, [liveQuotes]);
   const displayStats = useMemo(() => {
     // 1. Map live prices (normalize keys to Uppercase for matching)
     const priceMap = {};
@@ -41,14 +48,14 @@ function Dashboard() {
     });
     // 2. Standard Unrealized P/L Calculation
     const liveUnrealizedPnL = stats.openPositionDtos.reduce((acc, pos) => {
-        const symbolKey = pos.symbol?.toUpperCase();
-        const ltp = priceMap[symbolKey];
+      const symbolKey = pos.symbol?.toUpperCase();
+      const ltp = priceMap[symbolKey];
 
-        // Only calculate if we actually have a live price, otherwise P/L is 0
-        if (ltp) {
-          const tradePnL = (ltp - pos.avgEntryPrice) * pos.quantity;
-          return acc + tradePnL;
-        }
+      // Only calculate if we actually have a live price, otherwise P/L is 0
+      if (ltp) {
+        const tradePnL = (ltp - pos.avgEntryPrice) * pos.quantity;
+        return acc + tradePnL;
+      }
       return acc;
     }, 0);
 
@@ -64,6 +71,7 @@ function Dashboard() {
 
   return (
     <div className="p-6 space-y-8 min-h-screen bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
+      <MarketIndices indices={liveQuotes} />
       <div className="flex justify-between items-end flex-wrap gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Performance Overview</h2>
@@ -131,7 +139,6 @@ function Dashboard() {
           icon={<TrendingUp className="w-5 h-5" />}
           colorClass="text-slate-500"
           bgClass="bg-slate-500/10"
-          func={() => setStatusFilterDefault("Closed")}
         />
 
         {/* 5. Total Open - FROM BACKEND */}
@@ -141,12 +148,14 @@ function Dashboard() {
           icon={<Activity className="w-5 h-5" />}
           colorClass="text-amber-500"
           bgClass="bg-amber-500/10"
-          func={() => setStatusFilterDefault("Open")}
         />
       </div>
-
+      <div className="grid md:grid-cols-2 gap-6">
+        <EquityCurveChart statsDetails={stats} />
+        <MonthlyHeatmap statsDetails={stats} />
+      </div>
       <div className="mt-8">
-        <TradeTable tradeDetails={trade} authDetails={auth} statusFilterDefault={statusFilterDefault} />
+        <RecentTrades recentTrade={trades}/>
         <AuthorViewsSlider />
       </div>
     </div>

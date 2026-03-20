@@ -26,7 +26,8 @@ export default function Navbar({ onAuthOpen, isDark, toggleTheme }) {
 
     const navLinks = [
         { name: "Dashboard", path: "/dashboard", roles: [null, "USER", "ADMIN"] },
-        { name: "Add Trade", path: "/trades/new", roles: ["ADMIN"] },
+        { name: "All Trades", path: "/trades", roles: [null, "USER", "ADMIN"] },
+        { name: "Add Trade", path: "/trade/new", roles: ["ADMIN"] },
         { name: "Authors' View", path: "/admin/view", roles: ["ADMIN"] }
     ];
 
@@ -122,14 +123,14 @@ export default function Navbar({ onAuthOpen, isDark, toggleTheme }) {
 
             {/* Mobile Sidebar Overlay */}
             <div
-                className={`fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+                className={`fixed inset-0 z-60 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isMenuOpen ? "opacity-100 visible" : "opacity-0 invisible"
                     }`}
                 onClick={() => setIsMenuOpen(false)}
             />
 
             {/* Mobile Sidebar Menu */}
             <div
-                className={`fixed top-0 right-0 h-screen w-72 z-[70] bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${isMenuOpen ? "translate-x-0" : "translate-x-full"
+                className={`fixed top-0 right-0 h-screen w-72 z-70 bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${isMenuOpen ? "translate-x-0" : "translate-x-full"
                     }`}
             >
                 <div className="flex flex-col h-full">

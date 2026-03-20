@@ -36,6 +36,8 @@ const getTradeSlice = createSlice({
       totalOpen: 0,
       openPositionsEntryValue: 0,
       openPositionDtos: [],
+      monthlyHeatmap: [],
+      equityCurve: []
     },
     totalPages: 0,
     totalElements: 0,

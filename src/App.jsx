@@ -8,10 +8,17 @@ import AdminRoute from './routes/AdminRoutes';
 import { useLiveMarketData } from './hooks/useLiveMarketData';
 import LandingPage from './components/LandingPage';
 import AuthorView from './components/AuthorView';
+import TradeTable from './components/TradeTable';
+import { useSelector } from 'react-redux';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   useLiveMarketData(5000);
+  const trade = useSelector((state) => state.trade);
+  const auth = useSelector((state) => state.auth);
   return (
+    <>
+    <Toaster position="top-right" reverseOrder={false} />
     <Routes>
       <Route path="/" element={<LandingPage />} />
 
@@ -23,7 +30,13 @@ function App() {
         }
       />
       <Route
-        path="trades/new"
+        path="trades"
+        element={
+            <TradeTable tradeDetails={trade} authDetails={auth}/>
+        }
+      />
+      <Route
+        path="trade/new"
         element={
           <AdminRoute>
             <AddTrade />
@@ -42,6 +55,7 @@ function App() {
 
       <Route path="*" element={<NotFound />} />
     </Routes>
+    </>
   );
 }
 

@@ -18,8 +18,9 @@ import {
 import TradeDashboardHeading from './TradeDashboardHeading';
 import Tooltip from './Tooltip';
 import InsightCard from './InsightCard';
+import { calculatePL, calculatePercentageChange } from '@/lib/utils';
 
-const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
+const TradeTable = ({ tradeDetails, authDetails }) => {
     const { trades, loading, totalPages } = tradeDetails;
     const { role } = authDetails;
     const dispatch = useDispatch();
@@ -28,16 +29,17 @@ const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
     const [showAddTrade, setShowAddTrade] = useState(false);
     const liveQuotes = useSelector(state => state.market.quotes);
     const [symbolFilter, setSymbolFilter] = useState("");
-    const [statusFilter, setStatusFilter] = useState(statusFilterDefault || "ALL");
+    const [statusFilter, setStatusFilter] = useState("ALL");
     const [plFilter, setPlFilter] = useState("ALL");
     const [sortBy, setSortBy] = useState("entryTradeDate");
     const [sortDir, setSortDir] = useState("desc");
     const [insightTrade, setInsightTrade] = useState(null);
-
+    const [fullScreenImage, setFullScreenImage] = useState(null);
     useEffect(() => {
-        setStatusFilter(statusFilterDefault || "ALL");
-        dispatch(fetchTrades({ page, size: 10 }));
-    }, [page, dispatch, statusFilterDefault]);
+        if (page != 0) {
+            dispatch(fetchTrades({ page, size: 10 }));
+        }
+    }, [page, dispatch]);
 
     // Logic helpers (kept identical to your original code)
     const closeModal = () => {
@@ -53,23 +55,6 @@ const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
             setSortBy(field);
             setSortDir("asc");
         }
-    };
-
-    const calculatePL = (trade, currentPrice) => {
-        if (trade.status === "Closed" && trade.exitPrice) {
-            return (trade.exitPrice - trade.entryPrice) * trade.quantity;
-        }
-        if (!currentPrice) return 0;
-        return (currentPrice - trade.entryPrice) * trade.quantity;
-    };
-
-    const calculatePercentageChange = (trade, currentPrice) => {
-        const base = trade.entryPrice;
-        if (trade.status === "Closed" && trade.exitPrice) {
-            return ((trade.exitPrice - base) / base) * 100;
-        }
-        if (!currentPrice) return 0;
-        return ((currentPrice - base) / base) * 100;
     };
 
     const priceMap = useMemo(() => {
@@ -295,13 +280,34 @@ const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
             )}
             {insightTrade && (
                 <Modal isOpen={true} onClose={() => setInsightTrade(null)}>
-                    <div className="p-6 md:p-8 max-w-lg">
+                    <div className="p-6 md:p-8 max-w-2xl w-full">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-lg"><MessageSquareIcon size={20} /></div>
-                            <h3 className="text-xl font-black">{insightTrade.symbol} Insights</h3>
+                            <div className="p-2 bg-blue-100 dark:bg-blue-500/20 text-blue-600 rounded-lg">
+                                <MessageSquareIcon size={20} />
+                            </div>
+                            <h3 className="text-xl font-black">{insightTrade.symbol} Analysis</h3>
                         </div>
-                        <div className="space-y-4">
-                            {/* Inside your Insight Modal */}
+
+                        <div className="space-y-6">
+                            {/* Image Gallery Section */}
+                            {insightTrade.images && insightTrade.images.length > 0 && (
+                                <div className="space-y-2">
+                                    <label className="text-[10px] font-black uppercase text-slate-400 block">Trade Screenshots</label>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        {insightTrade.images.map((img, index) => (
+                                            <InsightCard
+                                                key={index}
+                                                label={`Chart ${index + 1}`}
+                                                val={img.imageUrl} // Accessing imageUrl from DTO
+                                                isImage={true}
+                                                onClick={() => window.open(img.imageUrl, '_blank')}
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Technical Notes */}
                             <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-700">
                                 <label className="text-[10px] font-black uppercase text-slate-400 block mb-2">Technical Notes</label>
                                 <div
@@ -309,11 +315,31 @@ const TradeTable = ({ tradeDetails, authDetails, statusFilterDefault }) => {
                                     dangerouslySetInnerHTML={{ __html: insightTrade.notes || "No comments." }}
                                 />
                             </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <InsightCard label="Entry" val={formatDate(insightTrade.entryTradeDate)} icon={<CalendarIcon size={14} />} />
                                 <InsightCard label="Segment" val={insightTrade.segment} icon={<InfoIcon size={14} />} />
                             </div>
                         </div>
+                    </div>
+                </Modal>
+            )}
+
+            {/* Full Screen Image Preview Modal */}
+            {fullScreenImage && (
+                <Modal isOpen={true} onClose={() => setFullScreenImage(null)}>
+                    <div className="relative p-2 max-w-4xl w-full">
+                        <img
+                            src={fullScreenImage}
+                            className="w-full h-auto rounded-lg shadow-2xl"
+                            alt="Full Preview"
+                        />
+                        <button
+                            onClick={() => setFullScreenImage(null)}
+                            className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                        >
+                            ✕
+                        </button>
                     </div>
                 </Modal>
             )}
